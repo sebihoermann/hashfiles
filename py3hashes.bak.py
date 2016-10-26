@@ -19,8 +19,7 @@ class Hashfile(object):
     def __init__(self, filename = "/home/sebi/hashes/books.csv", delimiter = ","):
         import csv, pickle
         from os import system 
-        if type(filename) is str:
-            list(filename)
+        
         self.csvfile = filename
         
         self.name = {}
@@ -151,7 +150,7 @@ class Hashfile(object):
         system("ls")
         a = False
         while a == False:
-           ans = raw_input(">")
+           ans = input(">")
            try:
                f = open(ans+".pickle","r")
                a = True
@@ -215,9 +214,47 @@ class Hashfile(object):
         print( "Search returned: ", len(self.searchreturn))
              
         
-class pdhash(Hashfile):
-    def __init__(self):
+class Pdhash(Hashfile):
+    """
+    Subclass of Hashfiles. Uses Pandas. Added Variables starting with pd...
+    
+    panda Dataframe: self.pd
+    
+    Variables:
+        pdffiles = self.pdpdf
+        
+        
+    """
+    def __init__(self, filename):
+        self.csvfile = filename
+        pd.options.display.float_format = '{:,.2f}'.format
         self.df = pd.read_csv(self.csvfile)
+        self.df = self.df[["File","Size", "Path", "MD5"]]
+        super(Pdhash,self).__init__(filename)
+        
+        self.pdpdf = self.contains()
+        self.pdebooks = self.containsmore(container = [".pdf", ".mobi", ".epub"])
+        self.pdmusic = self.containsmore(container=[".mp3", ".wav"] )
+        
+    def describe(self):
+        """
+        Calls pandas describe function on the class internal dataframe
+        """
+        return self.df.describe()
+    def containsmore(self, cname = "Path", container = list()):
+        """
+        Calls the pandas contains function several times and appends it to a 
+        Dataframe which is returned.
+        """
+        ret = pd.DataFrame()
+        for i in container:
+            ret= ret.append(self.contains(cname, i))
+        return ret
+    def contains(self, cname = "Path", container = ".pdf"):
+        """
+        Simple search, selecting columns by String.
+        """
+        return self.df[self.df[cname].str.contains(container)]
         
 
 
