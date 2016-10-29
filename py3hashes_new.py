@@ -12,16 +12,15 @@ import pandas as pd
 from pandas import DataFrame, Series
 from time import time
 import re
+import os
 
 
 class Hashfile(object):
 
     def __init__(self, filename = "/home/sebi/hashes/books.csv", delimiter = ","):
         import csv, pickle
-        from os import system 
-        
-        self.csvfile = filename
-        
+        import os
+       
         self.name = {}
         self.path = {}
         self.delimiter = delimiter
@@ -42,8 +41,16 @@ class Hashfile(object):
         self.tsize = 0
         self.topfiles = {}  
 
+        #csvfiles:
+            
+        if type(filename) == str:
+            self.csvfile = filename
+            self.loadcsv(self.csvfile)
+        if type(filename) == list:
+            for i in filename:
+                self.loadcsv(i)
         #load content:
-        self.loadcsv()
+        
         self.ebooks = self.generalhash(l = [".pdf", ".mobi", ".epub"])
         self.pythonbooks = self.notsearch(self.ebooks)
         self.totalsize()
@@ -53,12 +60,13 @@ class Hashfile(object):
         self.pdffiles = self.generalhash(l = [".pdf"])
         self.music = self.generalhash(l = [".mp3", ".ogg", ".wav", ".flac", ".aiff", ".vox", ".wma" ])
 
-    def loadcsv(self):
+    def loadcsv(self, fn):
         """
         Read a .csv file from pfish
         """
-        with open(self.csvfile) as f:
-                reader = csv.reader(f, delimiter = self.delimiter)
+        csvfile = fn
+        with open(csvfile) as f:
+                reader = csv.reader(f, delimiter = ",")
                 #print reader.next(), " ommitted"
                 for row in reader:
                          row0 = row[0]
@@ -211,6 +219,10 @@ class Hashfile(object):
         
             f.write("cp \""+i+"\" \""+path+"\"\n")
         f.close()
+    def evince(self, path = ""):
+        s = 'evince "{}"'.format(path)
+        print(s)
+        return os.system(s)
     def search(self, d,s = ["python"]):
         
         self.searchreturn = {}
@@ -233,9 +245,20 @@ class Pdhash(Hashfile):
         
     """
     def __init__(self, filename):
-        self.csvfile = filename
         pd.options.display.float_format = '{:,.2f}'.format
-        self.df = pd.read_csv(self.csvfile)
+        if type(filename) == str:
+            
+            self.df = pd.read_csv(filename)
+        if type(filename)== list:
+            print("its a list!")
+            dfs = []
+            for i in filename:
+                print ("concatting {}".format(i))
+                dfs.append(pd.read_csv(i))
+            self.df = pd.concat(dfs, ignore_index=True)
+                
+        
+        
         self.df = self.df[["File","Size", "Path", "MD5"]]
         super(Pdhash,self).__init__(filename)
         
