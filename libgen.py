@@ -6,9 +6,8 @@ Created on Mon May  8 10:47:12 2017
 
 @author: maluko
 """
-#import urllib
+
 from bs4 import BeautifulSoup
-#import codecs
 import os
 import pickle
 import socks
@@ -26,7 +25,6 @@ class Libgen(object):
         self.loadDb()
         self.search = search
         self.start = time.time()
-        #self.debug = debug
         self.text = {}
         self.md5 = []
         self.titles = []
@@ -42,7 +40,6 @@ class Libgen(object):
         socks.set_default_proxy(socks.SOCKS5, "localhost", 9050)
         socket.socket = socks.socksocket
         self.payload = request.urlopen(self.page)
-        #r = self.payload.readlines()
         self.soup = BeautifulSoup(self.payload)
         print(self.soup)
         self.getTD()
@@ -63,23 +60,14 @@ class Libgen(object):
         print(self.dbcontent)
 
     def LookUp(self, hashvalue):
-        #self.tstart()
-        #self.already={}
         if hashvalue not in self.dbcontent:
-            #self.already[hashvalue] = row[1]
             self.DbMissing[hashvalue] = self.lookup[hashvalue]
         else:
             self.already[hashvalue] = self.lookup[hashvalue]
-        #self.timit()
     def lookupHashDb(self, hashvalue):
-        #self.tstart()
-        #self.already = {}
-        #self.already = {}
         for row in self.db.content:
             if hashvalue == row[0]:
-                #print ("Already there: ", row[0], row[1])
                 self.already[hashvalue] = row[1]
-        #self.timit()
     def nextpage(self, page):
         self.tstart()
         self.lookup = {}
@@ -87,7 +75,6 @@ class Libgen(object):
         http://libgen.io/search.php?&req={}&phrase=1&view=simple&column=def&sort=def&sortmode=ASC&page={}
         """.format(self.search, page)
         self.payload = request.urlopen(self.page)
-        #r = self.payload.readlines()
         self.soup = BeautifulSoup(self.payload)
         print(self.soup)
         self.getTD()
@@ -115,7 +102,6 @@ class Libgen(object):
 
     def compareSearch(self):
         self.tstart()
-        #if self.lastSearch == {}:
         self.lastSearch()
         if self.lookup == {}:
             self.getTD()
